@@ -1,0 +1,8 @@
+make[1]: Entering directory '/home/mito/.local/state/backlight-fix/cachyos-7.3.0-4/drivers/gpu/drm/amd/amdgpu'
+  CC [M]  ../display/amdgpu_dm/amdgpu_dm_backlight.o
+  LD [M]  amdgpu.o
+  MODPOST Module.symvers
+  CC [M]  amdgpu.mod.o
+  LD [M]  amdgpu.ko
+  BTF [M] amdgpu.ko
+make[1]: Leaving directory '/home/mito/.local/state/backlight-fix/cachyos-7.3.0-4/drivers/gpu/drm/amd/amdgpu'

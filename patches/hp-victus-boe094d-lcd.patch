@@ -1,0 +1,45 @@
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_backlight.c
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_backlight.c
+@@ -39,6 +39,7 @@
+ #include "modules/inc/mod_power.h"
+ 
+ #include <linux/backlight.h>
++#include <linux/dmi.h>
+ #include <linux/minmax.h>
+ #include <linux/power_supply.h>
+ #include <drm/drm_edid.h>
+@@ -571,14 +572,31 @@
+ 	struct drm_luminance_range_info *luminance_range;
+ 	struct drm_device *drm;
+ 
+-	if (aconnector->bl_idx == -1 ||
+-	    aconnector->dc_link->connector_signal != SIGNAL_TYPE_EDP)
++	if (aconnector->dc_link->connector_signal != SIGNAL_TYPE_EDP)
+ 		return;
+ 
+ 	conn_base = &aconnector->base;
+ 	drm = conn_base->dev;
++
++	/*
++	 * This Victus LCD reports false OLED capabilities. Correct them even
++	 * before a backlight index is assigned: initial connector detection
++	 * classifies the panel before backlight-device setup runs.
++	 */
++	if (dmi_match(DMI_SYS_VENDOR, "HP") &&
++	    dmi_match(DMI_PRODUCT_NAME, "Victus by HP Gaming Laptop 15-fb0xxx") &&
++	    drm_edid_get_panel_id(aconnector->drm_edid) ==
++		    drm_edid_encode_panel_id('B', 'O', 'E', 0x094d)) {
++		aconnector->dc_link->dpcd_sink_ext_caps.bits.oled = 0;
++		aconnector->dc_link->dpcd_sink_ext_caps.bits.miniled = 0;
++		aconnector->dc_link->backlight_control_type = BACKLIGHT_CONTROL_PWM;
++		drm_info_once(drm, "HP Victus BOE094D: corrected LCD capabilities before panel detection\n");
++	}
++
++	if (aconnector->bl_idx == -1)
++		return;
++
+ 	adev = drm_to_adev(drm);
+-
+ 	caps = &adev->dm.backlight_caps[aconnector->bl_idx];
+ 	caps->ext_caps = &aconnector->dc_link->dpcd_sink_ext_caps;
+ 	caps->aux_support = false;

@@ -1,0 +1,7 @@
+--- a/etc/default/limine
++++ b/etc/default/limine
+@@ -3 +3,4 @@
+ BOOT_ORDER="*, *lts, *fallback, Snapshots"
++
++# HP Victus: previously working Linux ACPI identification and native PWM backlight.
++KERNEL_CMDLINE[default]+=" acpi_osi=Linux acpi_backlight=native amdgpu.backlight=0"
